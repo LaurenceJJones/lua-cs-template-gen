@@ -93,13 +93,18 @@ generate_css() {
 }
 
 inject_css_into_html() {
+    # escape backslashes in CSS
+    sed -i 's/\\/\\\\/g' dist/output.css
+    # for loop over ban and captcha
     for i in ban captcha; do
+        # if src/$i.html does not exist, exit
         if [ ! -f "src/$i.html" ]; then
             echo "${ERROR}src/$i.html not found${RESET}"
             exit 1
         fi
         echo "${FG_GREEN}Injecting CSS into dist/$i.html${RESET}"
-        sed "s/<link rel='stylesheet' href='output.css' >/<style>$(sed 's:/:\\/:g' dist/output.css)<\/style>/" src/$i.html > dist/$i.html
+        # replace <link rel='stylesheet' href='output.css' > with inline style tag in production
+        sed "s|<link rel='stylesheet' href='output.css' >|<style>$(sed 's:|:\\|:g' dist/output.css)</style>|" src/$i.html > dist/$i.html
     done
     echo "${FG_GREEN}Cleaning up${RESET}"
     rm dist/output.css
